@@ -1,31 +1,26 @@
+import { useEffect, useState } from "react";
 import createSubject from "./createSubject";
 
 let _sharedFields = {};
-
 const subject = createSubject();
 
-const _setSharedFields = (sharedFields, next = false) => {
-  _sharedFields = sharedFields;
-  if (next) subject.observers.forEach((each) => each.next(sharedFields));
+const _setSharedFields = (key, value, next = false) => {
+  if (next) subject.observers.forEach((each) => each.next(key, { ..._sharedFields, ...value }));
 };
 
-const useSharedFields = () => {
-  const [sharedFields, setSharedFields] = useState(_sharedFields);
+const useSharedFields = (key, init) => {
+  const [sharedFields, setSharedFields] = useState(init);
 
   useEffect(() => {
     const subscribed = subject.subscribe({
-      next: (fields) => {
-        setSharedFields(fields);
+      next: (_key, value) => {
+        if (_key === key) setSharedFields(value);
       },
     });
-
     return () => subscribed.unsubscribe();
-  }, []);
+  }, [key]);
 
-  return {
-    sharedFields,
-    setSharedFields: (sharedFields) => _setSharedFields(sharedFields, true),
-  };
+  return [sharedFields, (key, value) => _setSharedFields(key, value, true)];
 };
 
 export default useSharedFields;

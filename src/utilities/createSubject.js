@@ -3,21 +3,12 @@ const createSubject = () => {
 
   const subscribe = (obs) => {
     _observers.push(obs);
-
-    return {
-      unsubscribe: () => {
-        _observers = _observers.filter((o) => o !== obs);
-      },
-    };
+    return { unsubscribe: () => (_observers = _observers.filter((o) => o !== obs)) };
   };
 
-  const unsubscribe = () => {
-    _observers = [];
-  };
+  const unsubscribe = () => (_observers = []);
 
-  const next = () => {
-    _observers.forEach((each) => each.next?.());
-  };
+  const next = () => _observers.forEach((each) => each.next?.());
 
   return {
     get observers() {
